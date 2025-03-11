@@ -6,20 +6,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import java.time.Duration;
 import java.util.List;
-import java.util.Scanner;
 
 public class ADASCarSearch {
     @Test
     public void pesquisarADASDoCarro() {
-        // Primeiro, pede o modelo do carro ao usuário antes de abrir o navegador
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Digite o modelo do carro (ex: Toyota Corolla 2023): ");
-        String modeloCarro = scanner.nextLine();
-        scanner.close();
+        String modeloCarro = "Honda Civic 2024"; // Insira aqui o modelo do carro
 
         System.setProperty("webdriver.chrome.driver", "src\\drive\\chromedriver.exe");
-
-        // Configuração para evitar detecção
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.addArguments("start-maximized");
@@ -30,32 +23,53 @@ public class ADASCarSearch {
         WebDriver navegador = new ChromeDriver(options);
         WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(10));
 
-        // Removendo detecção de WebDriver via JavaScript
         JavascriptExecutor js = (JavascriptExecutor) navegador;
         js.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
 
-        // Acessa a página inicial do Google
         navegador.get("https://www.google.com/");
 
-        // Aguarda o campo de pesquisa e faz a busca
         WebElement searchBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("q")));
         searchBox.sendKeys(modeloCarro + " sistema ADAS", Keys.ENTER);
 
-        // Aguarda os resultados carregarem
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("h3")));
 
-        // Captura os títulos e links dos primeiros resultados
         List<WebElement> titulos = navegador.findElements(By.cssSelector("h3"));
         List<WebElement> links = navegador.findElements(By.cssSelector(".tF2Cxc a"));
 
-        // Exibe os primeiros 5 resultados
         System.out.println("\nResultados sobre ADAS para: " + modeloCarro);
-        for (int i = 0; i < Math.min(5, titulos.size()); i++) {
-            System.out.println((i + 1) + ". " + titulos.get(i).getText());
-            System.out.println("   Link: " + links.get(i).getAttribute("href"));
+
+        // Abrir os 3 primeiros links
+        for (int i = 0; i < Math.min(3, titulos.size()); i++) {
+            String titulo = titulos.get(i).getText();
+            String link = links.get(i).getAttribute("href");
+
+            System.out.println("\n" + (i + 1) + ". " + titulo);
+            System.out.println("   Link: " + link);
+
+            navegador.switchTo().newWindow(WindowType.TAB);
+            navegador.get(link);
+
+            try {
+                Thread.sleep(3000);
+
+                List<WebElement> paragrafos = navegador.findElements(By.tagName("p"));
+                StringBuilder textoADAS = new StringBuilder();
+
+                for (WebElement p : paragrafos) {
+                    String texto = p.getText();
+                    if (texto.toLowerCase().contains("adas") || texto.toLowerCase().contains("assistência") || texto.toLowerCase().contains("segurança")) {
+                        textoADAS.append(texto).append("\n");
+                    }
+                }
+
+                System.out.println("Informações sobre ADAS encontradas:");
+                System.out.println("   " + (textoADAS.length() > 0 ? textoADAS.toString() : "Nenhuma informação relevante encontrada."));
+
+            } catch (Exception e) {
+                System.out.println("  Erro ao carregar a página: " + e.getMessage());
+            }
         }
 
-        // Fecha o navegador
         navegador.quit();
     }
 }
