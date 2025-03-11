@@ -1,4 +1,3 @@
-import org.junit.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -8,7 +7,6 @@ import java.time.Duration;
 import java.util.List;
 
 public class ADASCarSearch {
-    @Test
     public void pesquisarADASDoCarro() {
         String modeloCarro = "Honda Civic 2024"; // Insira aqui o modelo do carro
 
