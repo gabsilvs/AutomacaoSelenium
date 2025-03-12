@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.List;
 
 public class ADASCarSearch {
+    @Test
     public void pesquisarADASDoCarro() {
         String modeloCarro = "Honda Civic 2024"; // Insira aqui o modelo do carro
 
